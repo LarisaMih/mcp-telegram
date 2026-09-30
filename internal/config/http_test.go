@@ -24,12 +24,12 @@ func TestResolveHTTPAddr(t *testing.T) {
 		wantErr    string
 	}{
 		{name: "local safe default", configured: defaultHTTPAddr, want: defaultHTTPAddr},
+		{name: "Railway or generic PORT", configured: defaultHTTPAddr, env: map[string]string{"PORT": "8088"}, want: ":8088"},
 		{name: "Cloud Run PORT", configured: defaultHTTPAddr, env: map[string]string{"K_SERVICE": "telegram", "PORT": "9090"}, want: ":9090"},
-		{name: "explicit address wins in Cloud Run", configured: ":8443", explicit: true, env: map[string]string{"K_SERVICE": "telegram", "PORT": "9090"}, want: ":8443"},
-		{name: "unrelated PORT does not widen bind", configured: defaultHTTPAddr, env: map[string]string{"PORT": "9090"}, want: defaultHTTPAddr},
+		{name: "explicit address wins over PORT", configured: ":8443", explicit: true, env: map[string]string{"PORT": "9090"}, want: ":8443"},
 		{name: "missing Cloud Run PORT", configured: defaultHTTPAddr, env: map[string]string{"K_SERVICE": "telegram"}, wantErr: "PORT is missing"},
-		{name: "invalid Cloud Run PORT", configured: defaultHTTPAddr, env: map[string]string{"K_SERVICE": "telegram", "PORT": "nope"}, wantErr: "invalid Cloud Run PORT"},
-		{name: "out of range Cloud Run PORT", configured: defaultHTTPAddr, env: map[string]string{"K_SERVICE": "telegram", "PORT": "65536"}, wantErr: "invalid Cloud Run PORT"},
+		{name: "invalid PORT", configured: defaultHTTPAddr, env: map[string]string{"PORT": "nope"}, wantErr: "invalid PORT"},
+		{name: "out of range PORT", configured: defaultHTTPAddr, env: map[string]string{"PORT": "65536"}, wantErr: "invalid PORT"},
 	}
 
 	for _, tt := range tests {
